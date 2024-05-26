@@ -1,5 +1,5 @@
 #!/bin/bash
-# ./build.sh inputdir outputdir
+# ./build.sh outputdir
 
 USER=sawako
 EXTRA_PACKAGES=(
@@ -21,6 +21,7 @@ AUR_PACKAGES=(
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 TMPDIR=$(mktemp -d)
+echo ">>> TMPDIR=$TMPDIR <<< If this crashes or Ctrl-C'd, delete it manually!"
 
 
 # Make sure we have a clean fresh archlive
@@ -42,7 +43,7 @@ for pkg in ${AUR_PACKAGES[@]}; do
     mkdir $TMPDIR/$pkg
     cd $TMPDIR/$pkg
     git clone --quiet "https://aur.archlinux.org/$pkg.git" .
-    makepkg --syncdeps --clean --rmdeps --noconfirm --noprogressbar || exit 1
+    makepkg --syncdeps --clean --rmdeps --noconfirm --noprogressbar >/dev/null || exit 1
     rm *-debug-*.zst
     cp *.zst $REPODIR/
     >/dev/null cd -
