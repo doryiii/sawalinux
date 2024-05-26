@@ -13,21 +13,18 @@ EXTRA_PACKAGES=(
     yt-dlp mpv gst-plugins-bad gst-plugins-good gst-plugins-ugly
     veracrypt tumbler ffmpegthumbnailer gimp cheese audacity
     noto-fonts noto-fonts-cjk noto-fonts-emoji noto-fonts-extra
-    # openbox tint2 nitrogen menumaker
-    # dolphin dolphin-plugins
 )
 AUR_PACKAGES=(
-    yay 
-    f3 google-chrome tor-browser-bin onlyoffice-bin kemono-scraper
+    yay f3 google-chrome tor-browser-bin onlyoffice-bin kemono-scraper
 )
 
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
+TMPDIR=$(mktemp -d)
 
 
 # Make sure we have a clean fresh archlive
-#sudo pacman -S --needed --quiet --noconfirm --noprogressbar archiso &&
-TMPDIR=$(mktemp -d)
+sudo pacman -S --needed --quiet --noconfirm --noprogressbar archiso &&
 ARCHLIVE=$TMPDIR/archlive
 cp -r /usr/share/archiso/configs/releng/ $ARCHLIVE || exit 1
 
@@ -38,33 +35,17 @@ for pkg in ${EXTRA_PACKAGES[@]}; do
 done >> $ARCHLIVE/packages.x86_64
 
 # Extra AUR packages
-declare -a alldeps=("archiso")
-for pkg in ${AUR_PACKAGES[@]}; do
-    mkdir $TMPDIR/$pkg
-    cd $TMPDIR/$pkg
-    git clone --quiet "https://aur.archlinux.org/$pkg.git" .
-    newdeps=( $(
-        source PKGBUILD;
-        deps=("${depends[@]}" "${makedepends[@]}");
-        for d in ${deps[@]}; do echo $d; done
-    ) )
-    alldeps=("${alldeps[@]}" "${newdeps[@]}")
-    >/dev/null cd -
-done
-alldeps=( $(for d in "${alldeps[@]}"; do echo $d; done | sort -u) )
-echo "AUR deps: "
-for d in ${alldeps[@]}; do echo -n "$d "; done
-exit 1
-
 REPODIR=$TMPDIR/repo
 mkdir -p $REPODIR
 gpg --auto-key-locate nodefault,wkd --locate-keys torbrowser@torproject.org
 for pkg in ${AUR_PACKAGES[@]}; do
+    mkdir $TMPDIR/$pkg
     cd $TMPDIR/$pkg
-    makepkg --clean --rmdeps --noconfirm --noprogressbar || exit 1
+    git clone --quiet "https://aur.archlinux.org/$pkg.git" .
+    makepkg --syncdeps --clean --rmdeps --noconfirm --noprogressbar || exit 1
     rm *-debug-*.zst
     cp *.zst $REPODIR/
-    cd -
+    >/dev/null cd -
     echo $pkg >> $ARCHLIVE/packages.x86_64
     rm -rf $TMPDIR/$pkg
 done
@@ -143,8 +124,8 @@ rm -rf $ETC/skel && cp -r $SCRIPT_DIR/skel $ETC/
 cp $SCRIPT_DIR/os-release $ETC/
 
 
-echo ==== $ARCHLIVE ====
-exit 1
+#echo ==== $ARCHLIVE ====
+#exit 1
 # Build the ISO
 OUTDIR="$1"
 if [ -z "$OUTDIR" ]; then
@@ -152,8 +133,8 @@ if [ -z "$OUTDIR" ]; then
 fi
 mkdir -p "$OUTDIR" &&
 WORKDIR="$(mktemp -d --tmpdir=$TMPDIR)"
-sudo mkarchiso -v -r -w "$WORKDIR" -o "$OUTDIR" $ARCHLIVE || exit 1
-rm -rf "$TMPDIR"
+sudo mkarchiso -r -w "$WORKDIR" -o "$OUTDIR" $ARCHLIVE || exit 1
+sudo rm -rf "$TMPDIR"
 
 
 # Test the ISO
