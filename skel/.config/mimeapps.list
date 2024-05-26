@@ -1,0 +1,9 @@
+[Added Associations]
+video/mp4=smplayer.desktop;mpv.desktop;
+video/mpeg=mpv.desktop;
+x-scheme-handler/http=exo-web-browser.desktop
+x-scheme-handler/https=exo-web-browser.desktop
+audio/mpeg=smplayer.desktop;mpv.desktop;
+image/jpeg=midori.desktop;smplayer_enqueue.desktop;gimp.desktop;
+video/x-msvideo=smplayer_enqueue.desktop;
+image/gif=midori.desktop;gimp.desktop;

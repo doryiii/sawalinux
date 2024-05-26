@@ -1,0 +1,1 @@
+zstyle ':prompt:grml:*:items:user' pre '%B%F{cyan}'
