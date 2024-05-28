@@ -133,8 +133,7 @@ if [ -z "$OUTDIR" ]; then
     OUTDIR="out"
 fi
 mkdir -p "$OUTDIR" &&
-WORKDIR="$(mktemp -d --tmpdir=$TMPDIR)"
-sudo mkarchiso -r -w "$WORKDIR" -o "$OUTDIR" $ARCHLIVE || exit 1
+sudo mkarchiso -v -r -o "$OUTDIR" $ARCHLIVE || exit 1
 sudo rm -rf "$TMPDIR"
 
 
@@ -152,3 +151,4 @@ qemu-system-x86_64 \
     -device virtio-keyboard-pci -device virtio-mouse-pci \
     -cdrom "$OUTFILE" &&
 rm OVMF_VARS.4m.fd.tmp
+
