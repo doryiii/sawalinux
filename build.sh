@@ -21,6 +21,7 @@ AUR_PACKAGES=(
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
 TMPDIR=$(mktemp -d)
+CWD=$(pwd)
 echo ">>> TMPDIR=$TMPDIR <<< If this crashes or Ctrl-C'd, delete it manually!"
 
 
@@ -40,11 +41,11 @@ REPODIR=$TMPDIR/repo
 mkdir -p $REPODIR
 gpg --auto-key-locate nodefault,wkd --locate-keys torbrowser@torproject.org
 for pkg in ${AUR_PACKAGES[@]}; do
+    echo ">> Building $pkg"
     mkdir $TMPDIR/$pkg
     cd $TMPDIR/$pkg
     git clone --quiet "https://aur.archlinux.org/$pkg.git" .
-    makepkg --syncdeps --clean --rmdeps --noconfirm --noprogressbar >/dev/null || exit 1
-    rm *-debug-*.zst
+    makepkg --config "$CWD/makepkg.conf" --syncdeps --clean --rmdeps --noconfirm --noprogressbar >/dev/null || exit 1
     cp *.zst $REPODIR/
     >/dev/null cd -
     echo $pkg >> $ARCHLIVE/packages.x86_64
