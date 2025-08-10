@@ -8,7 +8,8 @@ EXTRA_PACKAGES=(
     xorg-server xorg-xinit xterm
     xf86-video-intel xf86-video-ati xf86-video-amdgpu xf86-video-nouveau mesa
     lightdm xfce4 xfce4-goodies networkmanager network-manager-applet
-    pulseaudio pavucontrol gvfs file-roller gparted gsmartcontrol
+    gvfs file-roller gparted gsmartcontrol
+    pavucontrol pipewire-pulse
     bluez bluez-utils blueman
     yt-dlp mpv gst-plugins-bad gst-plugins-good gst-plugins-ugly
     veracrypt tumbler ffmpegthumbnailer gimp cheese audacity
