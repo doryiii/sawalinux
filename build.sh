@@ -1,19 +1,21 @@
 #!/bin/bash
 # ./build.sh outputdir
 
-USER=sawako
+USER=moon
 EXTRA_PACKAGES=(
     base-devel tree htop screen wget grml-zsh-config unrar p7zip grub
-    #intel-ucode amd-ucode
-    xorg-server xorg-xinit xterm
-    xf86-video-intel xf86-video-ati xf86-video-amdgpu xf86-video-nouveau mesa
-    lightdm xfce4 xfce4-goodies networkmanager network-manager-applet
+    intel-ucode amd-ucode
+    gnome #gnome-extra
+    gnome-tweaks file-roller dconf-editor gnome-sound-recorder 
+    mesa
+    gdm networkmanager network-manager-applet
     gvfs file-roller gparted gsmartcontrol
     pavucontrol pipewire-pulse
-    bluez bluez-utils blueman
+    bluez bluez-utils
     yt-dlp mpv gst-plugins-bad gst-plugins-good gst-plugins-ugly
     veracrypt tumbler ffmpegthumbnailer gimp cheese audacity
     noto-fonts noto-fonts-cjk noto-fonts-emoji noto-fonts-extra
+    discord steam firefox
 )
 AUR_PACKAGES=(
     yay f3 google-chrome tor-browser-bin onlyoffice-bin kemono-scraper
@@ -67,26 +69,59 @@ ETC=$ARCHLIVE/airootfs/etc
 ln -sf /usr/lib/systemd/system/NetworkManager.service $ETC/systemd/system/multi-user.target.wants/NetworkManager.service
 mkdir -p $ETC/systemd/system/bluetooth.target.wants
 ln -sf /usr/lib/systemd/system/bluetooth.service $ETC/systemd/system/bluetooth.target.wants/bluetooth.service
-ln -sf /usr/lib/systemd/system/lightdm.service $ETC/systemd/system/display-manager.service
+ln -sf /usr/lib/systemd/system/gdm.service $ETC/systemd/system/display-manager.service
 ln -sf /usr/lib/systemd/system/graphical.target $ETC/systemd/system/default.target
 rm $ETC/systemd/system/multi-user.target.wants/systemd-networkd.service &&
 rm $ETC/systemd/system/multi-user.target.wants/systemd-resolved.service &&
 rm $ETC/systemd/system/sockets.target.wants/systemd-networkd.socket &&
 
 
+# default gnome configs
+mkdir -p $ETC/dconf/db/lunarch.d
+echo "
+user-db:user
+system-db:lunarch
+" > $ETC/dconf/db/lunarch.d/00-lunarch-settings
+echo "
+[org/gnome/shell]
+favorite-apps = ['firefox.desktop', 'google-chrome.desktop', 'org.gnome.Nautilus.desktop']
+" > $ETC/dconf/db/lunarch.d/00-lunarch-settings
+mkdir -p $ETC/pacman.d/hooks
+echo "# remove from airootfs!
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = gnome-shell
+
+[Action]
+Description = Generating dconf...
+When = PostTransaction
+Depends = glibc
+Exec = /usr/bin/dconf update
+" > $ETC/pacman.d/hooks/gnome-dconf.hook
+
+
+# locale
+echo "en_US.UTF-8 UTF-8" > $ETC/locale.gen
+mkdir -p $ETC/pacman.d/hooks
+echo "# remove from airootfs!
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = glibc
+
+[Action]
+Description = Generating localisation files...
+When = PostTransaction
+Depends = glibc
+Exec = /usr/bin/locale-gen
+" > $ETC/pacman.d/hooks/locale-gen.hook
+
 # Other configs
 mkdir -p $ETC/sudoers.d &&
 echo '%wheel ALL=(ALL) NOPASSWD: ALL' > $ETC/sudoers.d/g_wheel &&
-mkdir -p $ETC/lightdm &&
-echo "
-[LightDM]
-run-directory=/run/lightdm
-
-[Seat:*]
-session-wrapper=/etc/lightdm/Xsession
-autologin-user=$USER
-autologin-session=xfce
-" > $ETC/lightdm/lightdm.conf &&
 
 cat $SCRIPT_DIR/passwd.skel > $ETC/passwd
 echo "
@@ -94,7 +129,7 @@ $USER:x:1000:1000::/home/$USER:/bin/zsh
 " >> $ETC/passwd &&
 cat $SCRIPT_DIR/shadow.skel > $ETC/shadow
 echo "
-$USER"':$6$6KMe1NizgXgXV508$r.r94d8DgkZw4mHo9PDOpcNq2n46qOete226rVqCtwMtvSJvq.t2oaZhfs/XKVlJbQ3oyixn4qpUMOF651mOW.:18468:0:99999:7:::
+$USER"':$y$j9T$SxiEZ3FI1s.C0HSII0lkf.$UM5o4i0sbJ.9gnwHUszStl.Da/Pg2cqeVZQFOzaEdh0:20415:0:99999:7:::
 ' >> $ETC/shadow &&
 cat $SCRIPT_DIR/group.skel > $ETC/group &&
 echo "
@@ -114,11 +149,11 @@ blacklist snd_pcsp' > $ETC/modprobe.d/nobeep.conf
 
 
 # branding
-sed -r -e 's~iso_name=.*$~iso_name="sawalinux"~g' -i $ARCHLIVE/profiledef.sh
-sed -r -e 's~iso_label=.*$~iso_label="SAWALINUX"~g' -i $ARCHLIVE/profiledef.sh
+sed -r -e 's~iso_name=.*$~iso_name="lunarch"~g' -i $ARCHLIVE/profiledef.sh
+sed -r -e 's~iso_label=.*$~iso_label="LUNARCH"~g' -i $ARCHLIVE/profiledef.sh
 sed -r -e 's~iso_publisher=.*$~iso_publisher="Dory <https://dory.moe>"~g' -i $ARCHLIVE/profiledef.sh
-sed -r -e 's~iso_application=.*~iso_application="SawaLinux Live/Rescue Distro"~g' -i $ARCHLIVE/profiledef.sh
-sed -r -e 's~install_dir=.*$~install_dir="sawa"~g' -i $ARCHLIVE/profiledef.sh
+sed -r -e 's~iso_application=.*~iso_application="Lunarch"~g' -i $ARCHLIVE/profiledef.sh
+sed -r -e 's~install_dir=.*$~install_dir="lunarch"~g' -i $ARCHLIVE/profiledef.sh
 sed -r -e '/file_permissions=/a ["/etc/gshadow"]="0:0:400"' -i $ARCHLIVE/profiledef.sh
 rm $ETC/motd
 rm -r $ARCHLIVE/efiboot && cp -r $SCRIPT_DIR/efiboot $ARCHLIVE/
