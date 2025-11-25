@@ -3,22 +3,31 @@
 
 USER=moon
 EXTRA_PACKAGES=(
-    base-devel tree htop screen wget grml-zsh-config unrar p7zip grub
+    base-devel tree htop screen wget grml-zsh-config unrar p7zip grub efibootmgr git
     intel-ucode amd-ucode
     gnome #gnome-extra
     gnome-tweaks file-roller dconf-editor gnome-sound-recorder gnome-shell-extension-appindicator
     mesa
-    gdm networkmanager network-manager-applet
+    vulkan-intel
+    vulkan-radeon
+    #fcitx5
+    gdm networkmanager #network-manager-applet
     gvfs file-roller gparted gsmartcontrol
     pavucontrol pipewire-pulse
     bluez bluez-utils
     yt-dlp mpv gst-plugins-bad gst-plugins-good gst-plugins-ugly
     veracrypt tumbler ffmpegthumbnailer gimp cheese audacity
     noto-fonts noto-fonts-cjk noto-fonts-emoji noto-fonts-extra
-    discord steam firefox
+    firefox discord steam
 )
 AUR_PACKAGES=(
-    yay f3 google-chrome tor-browser-bin onlyoffice-bin kemono-scraper
+    yay
+    #f3
+    google-chrome
+    tor-browser-bin
+    onlyoffice-bin
+    #kemono-scraper
+    llama.cpp-vulkan
 )
 
 
