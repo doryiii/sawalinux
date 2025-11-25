@@ -6,7 +6,7 @@ ORIG_ISO="$1"
 DEST_ISO="$2"
 SIZE="$3"
 
-COW_NAME="SAWACOWUSB"
+COW_NAME="LUNARCHCOW"
 TMP_IMG='/tmp/tmpimg'
 
 rm "$DEST_ISO"

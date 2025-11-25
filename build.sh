@@ -6,7 +6,7 @@ EXTRA_PACKAGES=(
     base-devel tree htop screen wget grml-zsh-config unrar p7zip grub
     intel-ucode amd-ucode
     gnome #gnome-extra
-    gnome-tweaks file-roller dconf-editor gnome-sound-recorder 
+    gnome-tweaks file-roller dconf-editor gnome-sound-recorder gnome-shell-extension-appindicator
     mesa
     gdm networkmanager network-manager-applet
     gvfs file-roller gparted gsmartcontrol
