@@ -1,5 +1,5 @@
 #!/bin/bash
-# ./build.sh outputdir
+# [TMPDIR=/some/where] ./build.sh [output/dir]
 
 USER=moon
 EXTRA_PACKAGES=(
@@ -7,9 +7,7 @@ EXTRA_PACKAGES=(
     intel-ucode amd-ucode
     gnome #gnome-extra
     gnome-tweaks file-roller dconf-editor gnome-sound-recorder gnome-shell-extension-appindicator
-    mesa
-    vulkan-intel
-    vulkan-radeon
+    mesa vulkan-intel vulkan-radeon
     #fcitx5
     gdm networkmanager #network-manager-applet
     gvfs file-roller gparted gsmartcontrol
@@ -32,14 +30,14 @@ AUR_PACKAGES=(
 
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)"
-TMPDIR=$(mktemp -d)
+TEMP_DIR=$(mktemp -d)
 CWD=$(pwd)
-echo ">>> TMPDIR=$TMPDIR <<< If this crashes or Ctrl-C'd, delete it manually!"
+echo ">>> TEMP_DIR=$TEMP_DIR <<< If this crashes or Ctrl-C'd, delete it manually!"
 
 
 # Make sure we have a clean fresh archlive
 sudo pacman -S --needed --quiet --noconfirm --noprogressbar archiso &&
-ARCHLIVE=$TMPDIR/archlive
+ARCHLIVE=$TEMP_DIR/archlive
 cp -r /usr/share/archiso/configs/releng/ $ARCHLIVE || exit 1
 
 
@@ -49,19 +47,19 @@ for pkg in ${EXTRA_PACKAGES[@]}; do
 done >> $ARCHLIVE/packages.x86_64
 
 # Extra AUR packages
-REPODIR=$TMPDIR/repo
+REPODIR=$TEMP_DIR/repo
 mkdir -p $REPODIR
 gpg --auto-key-locate nodefault,wkd --locate-keys torbrowser@torproject.org
 for pkg in ${AUR_PACKAGES[@]}; do
     echo ">> Building $pkg"
-    mkdir $TMPDIR/$pkg
-    cd $TMPDIR/$pkg
+    mkdir $TEMP_DIR/$pkg
+    cd $TEMP_DIR/$pkg
     git clone --quiet "https://aur.archlinux.org/$pkg.git" .
     makepkg --config "$CWD/makepkg.conf" --syncdeps --clean --rmdeps --noconfirm --noprogressbar >/dev/null || exit 1
     cp *.zst $REPODIR/
     >/dev/null cd -
     echo $pkg >> $ARCHLIVE/packages.x86_64
-    rm -rf $TMPDIR/$pkg
+    rm -rf $TEMP_DIR/$pkg
 done
 repo-add $REPODIR/custom.db.tar.gz $REPODIR/*.zst
 echo "
@@ -128,6 +126,11 @@ Depends = glibc
 Exec = /usr/bin/locale-gen
 " > $ETC/pacman.d/hooks/locale-gen.hook
 
+# Llama
+cp $SCRIPT_DIR/qwen3-vl-30b-thinking-q4_k_m.gguf $ARCHLIVE/airootfs/
+cp $SCRIPT_DIR/qwen3-vl-30b-thinking-mmproj.gguf $ARCHLIVE/airootfs/
+cp $SCRIPT_DIR/qwen3-vl-30b-run-llama.sh $ARCHLIVE/airootfs/
+
 # Other configs
 mkdir -p $ETC/sudoers.d &&
 echo '%wheel ALL=(ALL) NOPASSWD: ALL' > $ETC/sudoers.d/g_wheel &&
@@ -180,7 +183,7 @@ if [ -z "$OUTDIR" ]; then
 fi
 mkdir -p "$OUTDIR" &&
 sudo mkarchiso -v -r -o "$OUTDIR" $ARCHLIVE || exit 1
-sudo rm -rf "$TMPDIR"
+sudo rm -rf "$TEMP_DIR"
 
 
 # Test the ISO
