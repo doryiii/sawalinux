@@ -127,9 +127,9 @@ Exec = /usr/bin/locale-gen
 " > $ETC/pacman.d/hooks/locale-gen.hook
 
 # Llama
-cp $SCRIPT_DIR/qwen3-vl-30b-thinking-q4_k_m.gguf $ARCHLIVE/airootfs/
-cp $SCRIPT_DIR/qwen3-vl-30b-thinking-mmproj.gguf $ARCHLIVE/airootfs/
-cp $SCRIPT_DIR/qwen3-vl-30b-run-llama.sh $ARCHLIVE/airootfs/
+#cp $SCRIPT_DIR/qwen3-vl-30b-thinking-q4_k_m.gguf $ARCHLIVE/airootfs/
+#cp $SCRIPT_DIR/qwen3-vl-30b-thinking-mmproj.gguf $ARCHLIVE/airootfs/
+#cp $SCRIPT_DIR/qwen3-vl-30b-run-llama.sh $ARCHLIVE/airootfs/
 
 # Other configs
 mkdir -p $ETC/sudoers.d &&
